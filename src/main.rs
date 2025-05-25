@@ -1,55 +1,52 @@
+use std::collections::BTreeMap;
 use std::{env, fs};
 
-enum BencodeDataType {
-    String,
-    Integer,
-    List,
-    Dictionary,
-    None,
+enum Bencode {
+    Bytes(Vec<u8>),
+    Integer(i64),
+    List(Vec<Bencode>),
+    Dictionary(BTreeMap<String, Bencode>),
 }
 
-impl BencodeDataType {
-    fn from_identifier(id: char) -> Self {
-        match id {
-            's' => BencodeDataType::String,
-            'i' => BencodeDataType::String,
-            'l' => BencodeDataType::String,
-            'd' => BencodeDataType::String,
-            _ => BencodeDataType::None,
-        }
-    }
+struct BencodeParser {
+    input: Vec<u8>,
+    pos: usize,
 }
 
-fn bencode(bytes: &Vec<u8>) {
-    let mut bencode_type = BencodeDataType::None;
-    let mut pos: usize = 0;
-
-    loop {
-        if pos >= bytes.len() {
-            break;
-        }
-
-        match bencode_type {
-            BencodeDataType::None => {
-                let t = BencodeDataType::from_identifier(bytes[pos] as char);
-                match t {
-                    BencodeDataType::None => {
-                        println!("Invalid bencode data type at position {}", pos);
-                        break;
-                    }
-                    other => bencode_type = other,
-                }
-
-                pos += 1;
-            }
-            BencodeDataType::Dictionary => {}
-            BencodeDataType::String => {}
-            BencodeDataType::Integer => {}
-            BencodeDataType::List => {}
-        }
+impl BencodeParser {
+    fn new(input: Vec<u8>) -> Self {
+        BencodeParser { input, pos: 0 }
     }
 
-    println!("We are done");
+    fn parse_bytes(&mut self) -> Vec<u8> {
+        // TODO: Implement me
+        return vec![1, 2, 3];
+    }
+
+    fn parse_int(&mut self) -> i64 {
+        // TODO: Implement me
+        return 1;
+    }
+
+    fn parse_list(&mut self) -> Vec<Bencode> {
+        // TODO: Implement me
+        return vec![Bencode::Integer(1)];
+    }
+
+    fn parse_dictionary(&mut self) -> BTreeMap<String, Bencode> {
+        // TODO: Implement me
+        return BTreeMap::new();
+    }
+
+    fn parse(&mut self) -> Bencode {
+        let char = self.input[self.pos] as char;
+        match char {
+            'i' => Bencode::Integer(self.parse_int()),
+            'l' => Bencode::List(self.parse_list()),
+            'd' => Bencode::Dictionary(self.parse_dictionary()),
+            _ => Bencode::Bytes(self.parse_bytes()),
+        }
+    }
 }
 
 fn main() {
@@ -63,5 +60,6 @@ fn main() {
 
     println!("Size: {} bytes", bytes.len());
 
-    bencode(&bytes);
+    let mut p = BencodeParser::new(bytes);
+    let b = p.parse();
 }
