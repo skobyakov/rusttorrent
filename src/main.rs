@@ -35,7 +35,7 @@ impl BencodeParser {
         }
 
         let s = &self.input[self.pos..self.pos + offset];
-        let num_str = from_utf8(&s).expect("invalid valid UTF-8");
+        let num_str = from_utf8(&s).expect("invalid UTF-8");
 
         num_str.parse().expect("invalid number")
     }
