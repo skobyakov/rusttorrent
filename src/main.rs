@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::{env, fs};
 
+// TODO: Do I really need full bencode parser?
 enum Bencode {
     Bytes(Vec<u8>),
     Integer(i64),
