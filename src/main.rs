@@ -1,7 +1,9 @@
 use std::collections::BTreeMap;
+use std::str::from_utf8;
 use std::{env, fs};
 
 // TODO: Do I really need full bencode parser?
+#[derive(Debug)]
 enum Bencode {
     Bytes(Vec<u8>),
     Integer(i64),
@@ -25,8 +27,17 @@ impl BencodeParser {
     }
 
     fn parse_int(&mut self) -> i64 {
-        // TODO: Implement me
-        return 1;
+        self.pos += 1;
+        let mut offset = 0;
+
+        while self.input[self.pos + offset] != 'e' as u8 {
+            offset += 1
+        }
+
+        let s = &self.input[self.pos..self.pos + offset];
+        let num_str = from_utf8(&s).expect("invalid valid UTF-8");
+
+        num_str.parse().expect("invalid number")
     }
 
     fn parse_list(&mut self) -> Vec<Bencode> {
@@ -61,6 +72,8 @@ fn main() {
 
     println!("Size: {} bytes", bytes.len());
 
-    let mut p = BencodeParser::new(bytes);
+    let test_bytes = "i232e".as_bytes().to_vec();
+    let mut p = BencodeParser::new(test_bytes);
     let b = p.parse();
+    dbg!(b);
 }
