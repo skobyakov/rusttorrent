@@ -1,7 +1,9 @@
 use crate::bencode::BencodeParser;
+use crate::bittorrent::BitTorrent;
 use std::{env, fs};
 
-pub mod bencode;
+mod bencode;
+mod bittorrent;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -14,6 +16,9 @@ fn main() {
 
     let test_bytes = "d3:cow3:moo4:spami3ee".as_bytes().to_vec();
     let mut p = BencodeParser::new(test_bytes);
+
     let b = p.parse();
+    let client = BitTorrent::from_bencode(&b);
+
     dbg!(b);
 }
