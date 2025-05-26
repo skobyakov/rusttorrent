@@ -52,7 +52,7 @@ impl BencodeParser {
 
         let s = &self.input[self.pos..self.pos + offset];
 
-        self.pos += offset + 1;
+        self.pos += offset;
 
         from_utf8(&s)
             .expect("invalid UTF-8")
@@ -61,8 +61,16 @@ impl BencodeParser {
     }
 
     fn parse_list(&mut self) -> Vec<Bencode> {
-        // TODO: Implement me
-        return vec![Bencode::Integer(1)];
+        self.pos += 1;
+        let mut res: Vec<Bencode> = vec![];
+
+        while self.input[self.pos] != 'e' as u8 {
+            res.push(self.parse());
+        }
+
+        self.pos += 1;
+
+        res
     }
 
     fn parse_dictionary(&mut self) -> BTreeMap<String, Bencode> {
@@ -92,7 +100,7 @@ fn main() {
 
     println!("Size: {} bytes", bytes.len());
 
-    let test_bytes = "4:spam".as_bytes().to_vec();
+    let test_bytes = "l4:spami3e".as_bytes().to_vec();
     let mut p = BencodeParser::new(test_bytes);
     let b = p.parse();
     dbg!(b);
