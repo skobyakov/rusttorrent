@@ -7,7 +7,7 @@ enum Bencode {
     Bytes(Vec<u8>),
     Integer(i64),
     List(Vec<Bencode>),
-    Dictionary(BTreeMap<String, Bencode>),
+    Dictionary(BTreeMap<Vec<u8>, Bencode>),
 }
 
 struct BencodeParser {
@@ -20,6 +20,7 @@ impl BencodeParser {
         BencodeParser { input, pos: 0 }
     }
 
+    // TODO: Maybe we can stop returning new Vec? Try to return slice of original vector
     fn parse_bytes(&mut self) -> Vec<u8> {
         let mut offset = 0;
 
@@ -73,9 +74,20 @@ impl BencodeParser {
         res
     }
 
-    fn parse_dictionary(&mut self) -> BTreeMap<String, Bencode> {
-        // TODO: Implement me
-        return BTreeMap::new();
+    fn parse_dictionary(&mut self) -> BTreeMap<Vec<u8>, Bencode> {
+        self.pos += 1;
+        let mut res = BTreeMap::new();
+
+        while self.input[self.pos] != 'e' as u8 {
+            let key = self.parse_bytes();
+            let value = self.parse();
+
+            res.insert(key, value);
+        }
+
+        self.pos += 1;
+
+        res
     }
 
     fn parse(&mut self) -> Bencode {
@@ -98,9 +110,7 @@ fn main() {
     // TODO: All bytes are in memory now. Maybe we can add lazy reading from file using some sort of Reader abstraction?
     let bytes = fs::read(file_name).expect(&format!("Unable to read file: {}", file_name));
 
-    println!("Size: {} bytes", bytes.len());
-
-    let test_bytes = "l4:spami3e".as_bytes().to_vec();
+    let test_bytes = "d3:cow3:moo4:spam4:eggse".as_bytes().to_vec();
     let mut p = BencodeParser::new(test_bytes);
     let b = p.parse();
     dbg!(b);
