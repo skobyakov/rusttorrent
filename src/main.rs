@@ -22,8 +22,25 @@ impl BencodeParser {
     }
 
     fn parse_bytes(&mut self) -> Vec<u8> {
-        // TODO: Implement me
-        return vec![1, 2, 3];
+        let mut offset = 0;
+
+        while self.input[self.pos + offset] != ':' as u8 {
+            offset += 1;
+        }
+
+        let s = &self.input[self.pos..self.pos + offset];
+        let num_bytes: usize = from_utf8(&s)
+            .expect("invalid UTF-8")
+            .parse()
+            .expect("invalid number");
+
+        self.pos += offset + 1;
+
+        let bytes = &self.input[self.pos..self.pos + num_bytes];
+
+        self.pos += num_bytes;
+
+        bytes.to_vec()
     }
 
     fn parse_int(&mut self) -> i64 {
@@ -36,6 +53,8 @@ impl BencodeParser {
 
         let s = &self.input[self.pos..self.pos + offset];
         let num_str = from_utf8(&s).expect("invalid UTF-8");
+
+        self.pos += offset + 1;
 
         num_str.parse().expect("invalid number")
     }
@@ -72,7 +91,7 @@ fn main() {
 
     println!("Size: {} bytes", bytes.len());
 
-    let test_bytes = "i232e".as_bytes().to_vec();
+    let test_bytes = "4:spam".as_bytes().to_vec();
     let mut p = BencodeParser::new(test_bytes);
     let b = p.parse();
     dbg!(b);
