@@ -18,6 +18,7 @@ fn main() {
     let mut p = BencodeParser::new(test_bytes);
 
     let b = p.parse();
+
     let client = BitTorrent::from_bencode(&b);
 
     dbg!(b);
