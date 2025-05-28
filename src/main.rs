@@ -14,12 +14,14 @@ fn main() {
     // TODO: All bytes are in memory now. Maybe we can add lazy reading from file using some sort of Reader abstraction?
     let bytes = fs::read(file_name).expect(&format!("Unable to read file: {}", file_name));
 
-    let test_bytes = "d3:cow3:moo4:spami3ee".as_bytes().to_vec();
-    let mut p = BencodeParser::new(test_bytes);
+    // let test_bytes = "d3:cow3:moo4:spami3ee".as_bytes().to_vec();
+    let mut p = BencodeParser::new(bytes);
 
     let b = p.parse();
 
     let client = BitTorrent::from_bencode(&b);
 
-    dbg!(b);
+    dbg!(&client.announce, &client.piece_length, &client.name);
+
+    // dbg!(b);
 }
