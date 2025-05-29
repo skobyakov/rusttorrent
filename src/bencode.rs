@@ -1,6 +1,7 @@
 use sha1::{Digest, Sha1};
 use std::collections::BTreeMap;
 use std::str::from_utf8;
+use urlencoding::encode_binary;
 
 #[derive(Debug)]
 pub enum Bencode {
@@ -12,7 +13,7 @@ pub enum Bencode {
 
 pub struct BencodeParser {
     input: Vec<u8>,
-    pub info_hash: [u8; 20],
+    pub info_hash: String,
     pos: usize,
 }
 
@@ -21,7 +22,7 @@ impl BencodeParser {
         BencodeParser {
             input,
             pos: 0,
-            info_hash: [0u8; 20],
+            info_hash: String::from(""),
         }
     }
 
@@ -94,13 +95,11 @@ impl BencodeParser {
             let key_str = from_utf8(&key).expect("invalid UTF-8");
             if key_str == "info" {
                 let mut hasher = Sha1::new();
-                let b = &self.input[v1..v2];
-                hasher.update(b);
-                let result = hasher.finalize();
-                let mut hash = [0u8; 20];
-                hash.copy_from_slice(&result[..]);
+                hasher.update(&self.input[v1..v2]);
+                let result = &hasher.finalize()[..];
+                let encoded = encode_binary(result).to_string();
 
-                self.info_hash = hash;
+                self.info_hash = encoded;
             }
 
             res.insert(key, value);

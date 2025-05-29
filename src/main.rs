@@ -21,7 +21,13 @@ fn main() {
 
     let client = BitTorrent::from_bencode(&b, p.info_hash);
 
-    dbg!(&client.announce, &client.piece_length, &client.name);
+    dbg!(
+        &client.announce,
+        &client.piece_length,
+        &client.name,
+        &client.files,
+        &client.info_hash
+    );
 
     // dbg!(b);
 }

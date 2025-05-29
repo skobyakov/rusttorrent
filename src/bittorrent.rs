@@ -9,12 +9,12 @@ pub struct BitTorrent {
     pub name: String,
     pub piece_length: i64,
     pub pieces: Vec<u8>,
-    info_hash: [u8; 20],
-    files: Vec<(i64, String)>,
+    pub info_hash: String,
+    pub files: Vec<(i64, String)>,
 }
 
 impl BitTorrent {
-    pub fn from_bencode(bencode: &Bencode, info_hash: [u8; 20]) -> Self {
+    pub fn from_bencode(bencode: &Bencode, info_hash: String) -> Self {
         let mut res = BitTorrent {
             announce: String::from(""),
             name: "".to_string(),
@@ -68,7 +68,7 @@ impl BitTorrent {
                                         if let Bencode::List(list) = val {
                                             for (_, v) in list.iter().enumerate() {
                                                 if let Bencode::Dictionary(dict) = v {
-                                                    let name = "";
+                                                    let mut name = "";
                                                     let mut size = &0;
                                                     for (key, val) in dict {
                                                         let key_str =
@@ -84,10 +84,33 @@ impl BitTorrent {
                                                                     );
                                                                 }
                                                             }
-                                                            "path" => {}
+                                                            "path" => {
+                                                                if let Bencode::List(l) = val {
+                                                                    let first = l.get(0).unwrap();
+                                                                    if let Bencode::Bytes(bytes) =
+                                                                        first
+                                                                    {
+                                                                        let file = from_utf8(bytes)
+                                                                            .expect(
+                                                                                "invalid UTF-8",
+                                                                            );
+                                                                        name = file;
+                                                                    } else {
+                                                                        panic!(
+                                                                            "file path key should be bytes"
+                                                                        )
+                                                                    }
+                                                                } else {
+                                                                    panic!(
+                                                                        "file path key should be list"
+                                                                    )
+                                                                }
+                                                            }
                                                             _ => {} // TODO: Error
                                                         }
                                                     }
+                                                    res.files
+                                                        .push((size.to_owned(), name.to_owned()));
                                                 } else {
                                                     panic!("files item value should be dictionary");
                                                 }
