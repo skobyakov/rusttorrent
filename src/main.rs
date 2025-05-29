@@ -19,7 +19,7 @@ fn main() {
 
     let b = p.parse();
 
-    let client = BitTorrent::from_bencode(&b);
+    let client = BitTorrent::from_bencode(&b, p.info_hash);
 
     dbg!(&client.announce, &client.piece_length, &client.name);
 

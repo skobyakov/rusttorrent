@@ -14,13 +14,14 @@ pub struct BitTorrent {
 }
 
 impl BitTorrent {
-    pub fn from_bencode(bencode: &Bencode) -> Self {
+    // TODO: Should we use `[u8;160] without borrowing? Or referencing?
+    pub fn from_bencode(bencode: &Bencode, info_hash: [u8; 160]) -> Self {
         let mut res = BitTorrent {
             announce: String::from(""),
             name: "".to_string(),
             piece_length: 0,
             pieces: vec![],
-            info_hash: [0u8; 160],
+            info_hash,
             files: vec![],
         };
 

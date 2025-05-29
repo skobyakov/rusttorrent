@@ -1,3 +1,4 @@
+use sha1::{Digest, Sha1};
 use std::collections::BTreeMap;
 use std::str::from_utf8;
 
@@ -11,12 +12,17 @@ pub enum Bencode {
 
 pub struct BencodeParser {
     input: Vec<u8>,
+    pub info_hash: [u8; 160],
     pos: usize,
 }
 
 impl BencodeParser {
     pub fn new(input: Vec<u8>) -> Self {
-        BencodeParser { input, pos: 0 }
+        BencodeParser {
+            input,
+            pos: 0,
+            info_hash: [0u8; 160],
+        }
     }
 
     // TODO: Maybe we can stop returning new Vec? Try to return slice of original vector
@@ -79,7 +85,19 @@ impl BencodeParser {
 
         while self.input[self.pos] != 'e' as u8 {
             let key = self.parse_bytes();
+            let v1 = self.pos;
             let value = self.parse();
+            let v2 = self.pos;
+
+            // TODO: Refactoring
+            let key_str = from_utf8(&key).expect("invalid UTF-8");
+            if key_str == "info" {
+                let mut hasher = Sha1::new();
+                let b = &self.input[v1..v2];
+                hasher.update(b);
+                let result = &hasher.finalize()[..];
+                self.info_hash = result.try_into().unwrap();
+            }
 
             res.insert(key, value);
         }
