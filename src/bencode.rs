@@ -52,7 +52,7 @@ impl BencodeParser {
 
         let s = &self.input[self.pos..self.pos + offset];
 
-        self.pos += offset;
+        self.pos += offset + 1;
 
         from_utf8(&s)
             .expect("invalid UTF-8")
