@@ -135,4 +135,9 @@ impl BitTorrent {
 
         res
     }
+
+    pub fn server_call(&self) {
+        // TODO: Implement me
+        // http://bt3.t-ru.org/ann?info_hash=%F3%8Fs%1BU~%BCL%88d%D4%17%17-%C5%D5%0B%0E%17%C5&peer_id=kHVvUGob3rYADHlg1Zi5&ip=5.167.242.248&uploaded=0&downloaded=0&left=15066515&port=6881
+    }
 }
