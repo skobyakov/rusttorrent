@@ -68,6 +68,8 @@ impl BitTorrent {
                                         if let Bencode::List(list) = val {
                                             for (_, v) in list.iter().enumerate() {
                                                 if let Bencode::Dictionary(dict) = v {
+                                                    let name = "";
+                                                    let mut size = &0;
                                                     for (key, val) in dict {
                                                         let key_str =
                                                             from_utf8(key).expect("invalid UTF-8");
@@ -75,7 +77,7 @@ impl BitTorrent {
                                                         match key_str {
                                                             "length" => {
                                                                 if let Bencode::Integer(i) = val {
-                                                                    // TODO: Implement me
+                                                                    size = &i;
                                                                 } else {
                                                                     panic!(
                                                                         "file length key should be integer"
