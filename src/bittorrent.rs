@@ -24,67 +24,88 @@ impl BitTorrent {
             files: vec![],
         };
 
-        // TODO Refactor parse errors
-        match bencode {
-            Bencode::Dictionary(dict) => {
-                for (key, val) in dict {
-                    let key_str = from_utf8(key).expect("invalid UTF-8");
-
-                    match key_str {
-                        "announce" => {
-                            match val {
-                                Bencode::Bytes(bytes) => {
-                                    res.announce =
-                                        from_utf8(bytes).expect("invalid UTF-8").to_owned();
-                                }
-                                _ => {} // TODO: Error
-                            }
+        // TODO: Refactor errors
+        if let Bencode::Dictionary(dict) = bencode {
+            for (key, val) in dict {
+                let key_str = from_utf8(key).expect("invalid UTF-8");
+                match key_str {
+                    "announce" => {
+                        if let Bencode::Bytes(bytes) = val {
+                            res.announce = from_utf8(bytes).expect("invalid UTF-8").to_owned();
+                        } else {
+                            panic!("announce key should be bytes");
                         }
-                        "info" => {
-                            match val {
-                                Bencode::Dictionary(dict) => {
-                                    for (key, val) in dict {
-                                        let key_str = from_utf8(key).expect("invalid UTF-8");
+                    }
+                    "info" => {
+                        if let Bencode::Dictionary(dict) = val {
+                            for (key, val) in dict {
+                                let key_str = from_utf8(key).expect("invalid UTF-8");
 
-                                        match key_str {
-                                            "name" => {
-                                                match val {
-                                                    Bencode::Bytes(bytes) => {
-                                                        res.name = from_utf8(bytes)
-                                                            .expect("invalid UTF-8")
-                                                            .to_owned();
-                                                    }
-                                                    _ => {} // TODO: Error
-                                                }
-                                            }
-                                            "piece length" => {
-                                                match val {
-                                                    Bencode::Integer(i) => {
-                                                        res.piece_length = i.to_owned()
-                                                    }
-                                                    _ => {} // TODO: Error
-                                                }
-                                            }
-                                            "pieces" => {
-                                                match val {
-                                                    Bencode::Bytes(bytes) => {
-                                                        res.pieces = bytes.to_owned()
-                                                    }
-                                                    _ => {} // TODO: Error
-                                                }
-                                            }
-                                            _ => {}
+                                match key_str {
+                                    "name" => {
+                                        if let Bencode::Bytes(bytes) = val {
+                                            res.name =
+                                                from_utf8(bytes).expect("invalid UTF-8").to_owned();
+                                        } else {
+                                            panic!("name key should be bytes");
                                         }
                                     }
+                                    "piece length" => {
+                                        if let Bencode::Integer(i) = val {
+                                            res.piece_length = i.to_owned()
+                                        } else {
+                                            panic!("piece length key should be integer");
+                                        }
+                                    }
+                                    "pieces" => {
+                                        if let Bencode::Bytes(b) = val {
+                                            res.pieces = b.to_owned()
+                                        } else {
+                                            panic!("pieces value should be bytes");
+                                        }
+                                    }
+                                    "files" => {
+                                        if let Bencode::List(list) = val {
+                                            for (_, v) in list.iter().enumerate() {
+                                                if let Bencode::Dictionary(dict) = v {
+                                                    for (key, val) in dict {
+                                                        let key_str =
+                                                            from_utf8(key).expect("invalid UTF-8");
+
+                                                        match key_str {
+                                                            "length" => {
+                                                                if let Bencode::Integer(i) = val {
+                                                                    // TODO: Implement me
+                                                                } else {
+                                                                    panic!(
+                                                                        "file length key should be integer"
+                                                                    );
+                                                                }
+                                                            }
+                                                            "path" => {}
+                                                            _ => {} // TODO: Error
+                                                        }
+                                                    }
+                                                } else {
+                                                    panic!("files item value should be dictionary");
+                                                }
+                                            }
+                                        } else {
+                                            panic!("files value should be list");
+                                        }
+                                    }
+                                    _ => {}
                                 }
-                                _ => {} // TODO: Error
                             }
+                        } else {
+                            panic!("info key should be dictionary");
                         }
-                        _ => {} // TODO: Implement
                     }
+                    _ => {}
                 }
             }
-            _ => {} // TODO: Implement
+        } else {
+            panic!("not a dictionary");
         }
 
         res
