@@ -12,7 +12,7 @@ pub enum Bencode {
 
 pub struct BencodeParser {
     input: Vec<u8>,
-    pub info_hash: [u8; 160],
+    pub info_hash: [u8; 20],
     pos: usize,
 }
 
@@ -21,7 +21,7 @@ impl BencodeParser {
         BencodeParser {
             input,
             pos: 0,
-            info_hash: [0u8; 160],
+            info_hash: [0u8; 20],
         }
     }
 
@@ -90,13 +90,17 @@ impl BencodeParser {
             let v2 = self.pos;
 
             // TODO: Refactoring
+            // TODO: Implement SHA1 by yourself
             let key_str = from_utf8(&key).expect("invalid UTF-8");
             if key_str == "info" {
                 let mut hasher = Sha1::new();
                 let b = &self.input[v1..v2];
                 hasher.update(b);
-                let result = &hasher.finalize()[..];
-                self.info_hash = result.try_into().unwrap();
+                let result = hasher.finalize();
+                let mut hash = [0u8; 20];
+                hash.copy_from_slice(&result[..]);
+
+                self.info_hash = hash;
             }
 
             res.insert(key, value);

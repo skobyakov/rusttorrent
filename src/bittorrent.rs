@@ -9,13 +9,12 @@ pub struct BitTorrent {
     pub name: String,
     pub piece_length: i64,
     pub pieces: Vec<u8>,
-    info_hash: [u8; 160],
+    info_hash: [u8; 20],
     files: Vec<(i64, String)>,
 }
 
 impl BitTorrent {
-    // TODO: Should we use `[u8;160] without borrowing? Or referencing?
-    pub fn from_bencode(bencode: &Bencode, info_hash: [u8; 160]) -> Self {
+    pub fn from_bencode(bencode: &Bencode, info_hash: [u8; 20]) -> Self {
         let mut res = BitTorrent {
             announce: String::from(""),
             name: "".to_string(),
