@@ -97,6 +97,7 @@ impl BencodeParser {
                 let mut hasher = Sha1::new();
                 hasher.update(&self.input[v1..v2]);
                 let result = &hasher.finalize()[..];
+                // TODO: Implement encoding by yourself
                 let encoded = encode_binary(result).to_string();
 
                 self.info_hash = encoded;
