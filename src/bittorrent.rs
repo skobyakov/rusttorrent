@@ -1,6 +1,7 @@
 use crate::bencode::Bencode;
 use rand::{Rng, distr::Alphanumeric, rng};
 use reqwest::blocking::get;
+use std::io::Bytes;
 use std::ops::Add;
 use std::str::from_utf8;
 
@@ -147,12 +148,14 @@ impl BitTorrent {
         res
     }
 
-    pub fn server_call(&self) -> Result<String, reqwest::Error> {
+    pub fn server_call(&self) -> Result<Vec<u8>, reqwest::Error> {
         let url = format!(
             "{}?info_hash={}&peer_id={}&ip=8.8.8.8&port=6881&uploaded=0&downloaded=0&left=1000",
             self.announce, self.info_hash, self.peer_id
         );
 
-        get(&url)?.text()
+        let b = get(&url)?.bytes()?.to_vec();
+
+        Ok(b)
     }
 }

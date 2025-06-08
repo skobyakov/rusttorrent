@@ -7,7 +7,10 @@ mod bittorrent;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let file_name = &args[1];
+    let mut file_name = &String::from("files/ipv4.torrent");
+    if args.len() > 1 {
+        file_name = &args[1];
+    }
 
     dbg!(file_name);
 
@@ -16,13 +19,18 @@ fn main() {
 
     let mut p = BencodeParser::new(bytes);
 
-    let b = p.parse();
+    let mut b = p.parse();
 
     let client = BitTorrent::from_bencode(&b, p.info_hash);
 
     // println!("{:#?}", client);
 
     let body = client.server_call().unwrap();
+    //
+    // println!("{}", body);
 
-    println!("{}", body);
+    p = BencodeParser::new(body);
+    b = p.parse();
+
+    dbg!(b);
 }
