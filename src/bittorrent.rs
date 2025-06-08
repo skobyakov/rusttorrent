@@ -1,5 +1,7 @@
 use crate::bencode::Bencode;
+use rand::{Rng, distr::Alphanumeric, rng};
 use reqwest::blocking::get;
+use std::ops::Add;
 use std::str::from_utf8;
 
 // TODO: strings could be replaced with `&str` and lifetime annotation
@@ -12,10 +14,17 @@ pub struct BitTorrent {
     pub pieces: Vec<u8>,
     pub info_hash: String,
     pub files: Vec<(i64, String)>,
+    pub peer_id: String,
 }
 
 impl BitTorrent {
     pub fn from_bencode(bencode: &Bencode, info_hash: String) -> Self {
+        let random_string: String = rng()
+            .sample_iter(&Alphanumeric)
+            .take(20)
+            .map(char::from)
+            .collect();
+
         let mut res = BitTorrent {
             announce: String::from(""),
             name: "".to_string(),
@@ -23,6 +32,7 @@ impl BitTorrent {
             pieces: vec![],
             info_hash,
             files: vec![],
+            peer_id: random_string,
         };
 
         // TODO: Refactor errors
@@ -138,10 +148,11 @@ impl BitTorrent {
     }
 
     pub fn server_call(&self) -> Result<String, reqwest::Error> {
-        // TODO: Implement client by yourself
-        // http://bt3.t-ru.org/ann?info_hash=%F3%8Fs%1BU~%BCL%88d%D4%17%17-%C5%D5%0B%0E%17%C5&peer_id=kHVvUGob3rYADHlg1Zi5&ip=5.167.242.248&uploaded=0&downloaded=0&left=15066515&port=6881
-        let body = get("")?.text()?;
+        let url = format!(
+            "{}?info_hash={}&peer_id={}&ip=8.8.8.8&port=6881&uploaded=0&downloaded=0&left=1000",
+            self.announce, self.info_hash, self.peer_id
+        );
 
-        Ok(body)
+        get(&url)?.text()
     }
 }

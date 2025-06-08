@@ -20,6 +20,8 @@ fn main() {
 
     let client = BitTorrent::from_bencode(&b, p.info_hash);
 
+    // println!("{:#?}", client);
+
     let body = client.server_call().unwrap();
 
     println!("{}", body);
